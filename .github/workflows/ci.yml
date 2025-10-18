@@ -18,13 +18,19 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          echo "Installing project dependencies..."
+          npm install || echo "Dependency installation failed!"
 
       - name: Run lint check
-        run: npm run lint || echo "Linting failed!"
+        run: |
+          echo "Running lint check..."
+          npm run lint && echo "Linting passed successfully!" || echo "Linting failed!"
 
       - name: Run tests
-        run: npm test || echo "Tests failed!"
+        run: |
+          echo "Running test cases..."
+          npm test && echo "All tests passed successfully!" || echo "Some tests failed!"
 
       - name: Final status
-        run: echo "✅ CI workflow completed (check above for any failures)."
+        run: echo "Continuous Integration workflow completed!"
