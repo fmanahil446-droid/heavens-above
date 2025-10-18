@@ -1,5 +1,6 @@
-name: Deployment Pipeline
+name: Deployment Workflow
 
+# Trigger workflow on push to main branch
 on:
   push:
     branches:
@@ -10,26 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Step 4: Run tests
       - name: Run tests
         run: npm test
 
-      - name: Deploy to Railway
-        uses: railwayapp/cli-action@v2
-        with:
-          railwayToken: ${{ secrets.RAILWAY_API_KEY }}
-          environment: "production"
+      # Step 5: Deploy to Vercel
+      - name: Deploy to Vercel
+        run: |
+          npm install -g vercel
+          vercel login --token ${{ secrets.VERCEL_TOKEN }}
+          vercel --prod --confirm
 
+      # Step 6: Success message
       - name: Success message
         if: ${{ success() }}
-        run: echo "✅ Deployment to Railway completed successfully!"
+        run: echo "✅ Deployment to Vercel completed successfully!"
