@@ -30,11 +30,11 @@ jobs:
         run: npm test
 
       # Step 5: Deploy to Vercel
+     
       - name: Deploy to Vercel
         run: |
           npm install -g vercel
-          vercel login --token ${{ secrets.VERCEL_TOKEN }}
-          vercel --prod --confirm
+          vercel --prod --confirm --token ${{ secrets.VERCEL_TOKEN }}
 
       # Step 6: Success message
       - name: Success message
