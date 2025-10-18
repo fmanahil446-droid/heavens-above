@@ -1,1 +1,1 @@
-console.log("Hello from Manahil's project!");
+console.log("Hello from Manahil's project!")
