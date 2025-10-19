@@ -1,0 +1,64 @@
+name: Scheduled Task
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:       
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Create backup directory
+      - name: Create backup directory
+        run: mkdir -p backups
+
+      # Step 3: Perform maintenance (cleaning old builds, node_modules, etc.)
+      - name: Perform maintenance tasks
+        run: |
+          echo "Performing maintenance tasks..."
+          rm -rf node_modules/ || echo "No node_modules found"
+          rm -rf dist/ || echo "No dist folder found"
+          echo "Maintenance completed successfully."
+
+      # Step 4: Create a ZIP backup of repository
+      - name: Create backup archive
+        run: |
+          BACKUP_NAME="backup-$(date +%Y-%m-%d-%H-%M-%S).zip"
+          echo "Creating backup: $BACKUP_NAME"
+          zip -r backups/$BACKUP_NAME . -x "*.git*" "node_modules/*"
+          echo "Backup created at backups/$BACKUP_NAME"
+
+      # Step 5: Upload backup artifact to GitHub
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-backup
+          path: backups/
+
+      # Step 6: Generate and save logs
+      - name: Create log file
+        run: |
+          echo "🧾 Maintenance & Backup Log" > maintenance-log.txt
+          echo "Date: $(date)" >> maintenance-log.txt
+          echo "Repository: $GITHUB_REPOSITORY" >> maintenance-log.txt
+          echo "Workflow Run ID: $GITHUB_RUN_ID" >> maintenance-log.txt
+          echo "Backup completed successfully" >> maintenance-log.txt
+
+      - name: Upload log file
+        uses: actions/upload-artifact@v4
+        with:
+          name: maintenance-log
+          path: maintenance-log.txt
+
+      # Step 7: Add summary notification
+      - name: Add summary
+        run: |
+          echo "Scheduled Task Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Maintenance & backup completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Backup stored as artifact" >> $GITHUB_STEP_SUMMARY
+          echo "Run time: $(date)" >> $GITHUB_STEP_SUMMARY
