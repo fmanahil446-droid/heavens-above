@@ -1,64 +1,71 @@
 name: Scheduled Task
+
 on:
   schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:       
+    - cron: "0 0 * * *"   
+  workflow_dispatch:        
 
 jobs:
   maintenance:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Create backup directory
+      # Step 2: Prepare backup folder
       - name: Create backup directory
         run: mkdir -p backups
 
-      # Step 3: Perform maintenance (cleaning old builds, node_modules, etc.)
-      - name: Perform maintenance tasks
+      # Step 3: Perform maintenance tasks
+      - name: Run maintenance scripts
         run: |
-          echo "Performing maintenance tasks..."
+          echo "Performing cleanup..."
           rm -rf node_modules/ || echo "No node_modules found"
           rm -rf dist/ || echo "No dist folder found"
-          echo "Maintenance completed successfully."
+          echo "Cleanup done."
 
-      # Step 4: Create a ZIP backup of repository
-      - name: Create backup archive
+      # Step 4: Create ZIP backup
+      - name: Create repository backup
         run: |
           BACKUP_NAME="backup-$(date +%Y-%m-%d-%H-%M-%S).zip"
           echo "Creating backup: $BACKUP_NAME"
           zip -r backups/$BACKUP_NAME . -x "*.git*" "node_modules/*"
-          echo "Backup created at backups/$BACKUP_NAME"
+          echo "Backup created successfully at backups/$BACKUP_NAME"
 
-      # Step 5: Upload backup artifact to GitHub
+      # Step 5: Upload backup
       - name: Upload backup artifact
         uses: actions/upload-artifact@v4
         with:
           name: project-backup
           path: backups/
 
-      # Step 6: Generate and save logs
-      - name: Create log file
+      # Step 6: Generate and upload log file
+      - name: Generate maintenance log
         run: |
-          echo "🧾 Maintenance & Backup Log" > maintenance-log.txt
-          echo "Date: $(date)" >> maintenance-log.txt
-          echo "Repository: $GITHUB_REPOSITORY" >> maintenance-log.txt
-          echo "Workflow Run ID: $GITHUB_RUN_ID" >> maintenance-log.txt
-          echo "Backup completed successfully" >> maintenance-log.txt
+          LOG_FILE="maintenance-log-$(date +%Y-%m-%d-%H-%M-%S).txt"
+          echo "Maintenance & Backup Log" > $LOG_FILE
+          echo "Date: $(date)" >> $LOG_FILE
+          echo "Repository: $GITHUB_REPOSITORY" >> $LOG_FILE
+          echo "Workflow Run ID: $GITHUB_RUN_ID" >> $LOG_FILE
+          echo "Backup file stored as: $BACKUP_NAME" >> $LOG_FILE
+          echo "Maintenance completed successfully" >> $LOG_FILE
+          echo "Logs saved at: $LOG_FILE"
+          mv $LOG_FILE maintenance-log.txt
 
-      - name: Upload log file
+      - name: Upload log artifact
         uses: actions/upload-artifact@v4
         with:
           name: maintenance-log
           path: maintenance-log.txt
 
       # Step 7: Add summary notification
-      - name: Add summary
+      - name: Workflow summary
         run: |
-          echo "Scheduled Task Summary" >> $GITHUB_STEP_SUMMARY
-          echo "Maintenance & backup completed successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Backup stored as artifact" >> $GITHUB_STEP_SUMMARY
-          echo "Run time: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "Scheduled Maintenance Report" >> $GITHUB_STEP_SUMMARY
+          echo "Repository:** $GITHUB_REPOSITORY" >> $GITHUB_STEP_SUMMARY
+          echo "Run ID:** $GITHUB_RUN_ID" >> $GITHUB_STEP_SUMMARY
+          echo "Status:**Completed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Backup saved as:** $BACKUP_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
