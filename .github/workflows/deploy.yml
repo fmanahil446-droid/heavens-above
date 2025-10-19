@@ -1,6 +1,5 @@
-name: Deployment Workflow
+name: Deployment
 
-# Trigger workflow on push to main branch
 on:
   push:
     branches:
@@ -11,32 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run tests
       - name: Run tests
         run: npm test
 
-      # Step 5: Deploy to Vercel
-     
       - name: Deploy to Vercel
         run: |
           npm install -g vercel
-          vercel --prod --confirm --token ${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm
 
-      # Step 6: Success message
       - name: Success message
         if: ${{ success() }}
         run: echo "✅ Deployment to Vercel completed successfully!"
