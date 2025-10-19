@@ -1,65 +1,54 @@
-name: Dependency Updates 
+name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 0"     
-  workflow_dispatch:         
-  push:
-    branches: [ main ]      
+    - cron: "0 0 * * 1"  
+  workflow_dispatch:      
+
 jobs:
-  dependency-update:
+  update-dependencies:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Step 2: Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 20     
 
-      # Step 3: Check for outdated dependencies
+      - name: Install dependencies
+        run: npm install
+
       - name: Check for outdated dependencies
         run: |
           echo "Checking for outdated npm dependencies..."
-          npm install
-          npm outdated || echo "All dependencies are up to date."
+          npm outdated || true
 
-      # Step 4: Update dependencies automatically
       - name: Update dependencies
         run: |
           echo "Updating dependencies..."
           npm update
-          echo "Dependencies updated."
 
-      # Step 5: Run tests after update
-      - name: Run tests
-        run: |
-          echo "Running tests to verify updated dependencies..."
-          npm test || echo "No tests found or test failed"
+      # Add this new section here
+      - name: Run npm audit fix
+        run: npm audit fix || true
 
-      # Step 6: Commit and push updates (only if changes exist)
+      # Then add this section to commit and push updates
       - name: Commit and push updates
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [[ `git status --porcelain` ]]; then
-            git add package*.json
-            git commit -m "chore(deps): automated npm dependency updates"
-            git push
-            echo "Updates committed and pushed successfully."
-          else
-            echo "No dependency updates found."
-          fi
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add package*.json
+          git commit -m "Auto dependency update" || echo "No changes to commit"
+          git push
 
-      # Step 7: Create summary log
-      - name: Add workflow summary
+      # Optional: Run tests to ensure updates don't break anything
+      - name: Run tests
         run: |
-          echo "Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Checked and updated npm dependencies" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests executed after update" >> $GITHUB_STEP_SUMMARY
-          echo "- Changes pushed automatically if needed" >> $GITHUB_STEP_SUMMARY
-          echo "- Run completed on: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "Running tests..."
+          npm test || echo "Tests failed – please check compatibility."
+
+      - name: Log update completion
+        run: echo "Dependency update workflow completed successfully."
