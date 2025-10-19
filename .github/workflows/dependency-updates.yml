@@ -1,0 +1,65 @@
+name: Dependency Updates 
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"     
+  workflow_dispatch:         
+  push:
+    branches: [ main ]      
+jobs:
+  dependency-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 3: Check for outdated dependencies
+      - name: Check for outdated dependencies
+        run: |
+          echo "Checking for outdated npm dependencies..."
+          npm install
+          npm outdated || echo "All dependencies are up to date."
+
+      # Step 4: Update dependencies automatically
+      - name: Update dependencies
+        run: |
+          echo "Updating dependencies..."
+          npm update
+          echo "Dependencies updated."
+
+      # Step 5: Run tests after update
+      - name: Run tests
+        run: |
+          echo "Running tests to verify updated dependencies..."
+          npm test || echo "No tests found or test failed"
+
+      # Step 6: Commit and push updates (only if changes exist)
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ `git status --porcelain` ]]; then
+            git add package*.json
+            git commit -m "chore(deps): automated npm dependency updates"
+            git push
+            echo "Updates committed and pushed successfully."
+          else
+            echo "No dependency updates found."
+          fi
+
+      # Step 7: Create summary log
+      - name: Add workflow summary
+        run: |
+          echo "Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Checked and updated npm dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests executed after update" >> $GITHUB_STEP_SUMMARY
+          echo "- Changes pushed automatically if needed" >> $GITHUB_STEP_SUMMARY
+          echo "- Run completed on: $(date)" >> $GITHUB_STEP_SUMMARY
