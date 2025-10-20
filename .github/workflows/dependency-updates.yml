@@ -2,12 +2,8 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 1"    
+    - cron: "0 0 * * 1"   
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
 
 jobs:
   update-dependencies:
@@ -34,20 +30,14 @@ jobs:
         run: |
           echo "Updating dependencies..."
           npm update
+          npm audit fix || true
 
-      - name: Run npm audit fix
-        run: npm audit fix || true
-
-      - name: Commit updated dependencies
-        id: commit
+      - name: Commit dependency changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          BRANCH="dependency-updates-$(date +%Y-%m-%d)"
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          git checkout -b $BRANCH
-          git add -f package*.json || true
-          git commit -m "Auto dependency update on $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git add package*.json || true
+          git diff-index --quiet HEAD || git commit -m "Auto dependency update on $(date +%Y-%m-%d)"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -55,12 +45,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Automated Dependency Update"
           body: "This pull request includes automatically updated dependencies. Please review and merge if everything looks good."
-          branch: ${{ steps.commit.outputs.branch }}  
+          branch: dependency-updates  
           base: main
           commit-message: "chore: automated dependency updates"
           labels: dependencies, automation
-          create-branch: true       # <<< important!
-
 
       - name: Run tests
         run: |
