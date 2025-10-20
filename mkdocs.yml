@@ -1,6 +1,24 @@
 site_name: Heavens Above Documentation
-nav:
-  - Home: index.md
-docs_dir: docs
+site_url: https://fmanahil446-droid.github.io/heavens-above
+
 theme:
   name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+
+plugins:
+  - search
+  - awesome-pages
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite
+  - footnotes
+  - tables
+  - attr_list
+  - def_list
