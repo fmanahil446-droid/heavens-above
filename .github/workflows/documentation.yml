@@ -13,6 +13,10 @@ jobs:
       # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Install MkDocs and plugins
+        run: |
+          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
 
       # Step 2: Set up Python (for MkDocs)
       - name: Set up Python
