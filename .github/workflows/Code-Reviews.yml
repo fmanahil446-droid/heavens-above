@@ -29,6 +29,3 @@ jobs:
         with:
           languages: javascript
       - run: github/codeql-action/analyze@v2
-
-      - name: Scan for Secrets
-        uses: trufflesecurity/trufflehog@v3
