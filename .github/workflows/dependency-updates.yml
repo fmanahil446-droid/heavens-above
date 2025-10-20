@@ -2,7 +2,7 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 1"  
+    - cron: "0 0 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -20,22 +20,37 @@ jobs:
         with:
           node-version: 20
 
-      # 3️⃣ Install dependencies
+      # 3️⃣ Cache node modules for faster installs
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Check for outdated dependencies (minor/patch only)
-      - name: Check and update dependencies
+      # 5️⃣ Check and update outdated dependencies (minor/patch only)
+      - name: Update dependencies
         run: |
           echo "Checking for outdated npm dependencies (minor/patch only)..."
           npx npm-check-updates -u --target minor
           npm install
 
-      # 5️⃣ Run audit to fix vulnerabilities
+      # 6️⃣ Audit & fix vulnerabilities
       - name: Audit & fix vulnerabilities
         run: npm audit fix || true
 
-      # 6️⃣ Commit dependency changes if updates exist
+      # 7️⃣ Run tests BEFORE creating PR
+      - name: Run tests
+        run: |
+          echo "Running tests before PR creation..."
+          npm test
+
+      # 8️⃣ Commit dependency changes if updates exist
       - name: Commit dependency changes
         run: |
           git config --global user.name "github-actions"
@@ -48,7 +63,7 @@ jobs:
             exit 0
           fi
 
-      # 7️⃣ Create Pull Request on a unique branch
+      # 9️⃣ Create Pull Request on a unique branch
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -56,18 +71,13 @@ jobs:
           title: "Automated Dependency Update"
           body: |
             This pull request includes automatically updated dependencies (minor/patch only).
-            Please review and approve before merging. Tests have been run to ensure compatibility.
+            Tests have already run successfully before PR creation.
+            Please review and approve before merging.
           branch: dependency-updates-${{ github.run_id }}
           base: main
           commit-message: "chore: automated dependency updates"
           labels: dependencies, automation
 
-      # 8️⃣ Run tests to ensure updates are safe
-      - name: Run Tests
-        run: |
-          echo "Running tests..."
-          npm test
-
-      # 9️⃣ Log workflow completion
+      # 10️⃣ Log workflow completion
       - name: Log workflow completion
         run: echo "Dependency update workflow completed successfully."
