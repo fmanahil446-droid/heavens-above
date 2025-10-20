@@ -2,8 +2,12 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 1"   
-  workflow_dispatch:        
+    - cron: "0 0 * * 1"     
+  workflow_dispatch:          
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   update-dependencies:
@@ -38,8 +42,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git checkout -b dependency-updates-$(date +%Y-%m-%d)
-          git add -f package*.json
+          BRANCH="dependency-updates-$(date +%Y-%m-%d)"
+          git checkout -B $BRANCH
+          git add -f package*.json || true
           git commit -m "Auto dependency update on $(date +%Y-%m-%d)" || echo "No changes to commit"
 
       - name: Create Pull Request
@@ -47,8 +52,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Automated Dependency Update"
-          body: "This pull request includes automatically updated dependencies. Please review before merging."
-          branch: dependency-updates
+          body: "This pull request includes automatically updated dependencies. Please review and merge if everything looks good."
+          branch: ${{ github.ref_name }}
           base: main
           commit-message: "chore: automated dependency updates"
           labels: dependencies, automation
