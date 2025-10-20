@@ -2,7 +2,7 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 1"   
+    - cron: "0 0 * * 1"  
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -24,18 +24,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check outdated dependencies
+      # 4️⃣ Check for outdated dependencies (minor/patch only)
+      - name: Check and update dependencies
         run: |
           echo "Checking for outdated npm dependencies (minor/patch only)..."
           npx npm-check-updates -u --target minor
           npm install
 
-
       # 5️⃣ Run audit to fix vulnerabilities
-      - name: Audit & Fix Vulnerabilities
+      - name: Audit & fix vulnerabilities
         run: npm audit fix || true
 
-      # 6️⃣ Commit changes only if there are updates
+      # 6️⃣ Commit dependency changes if updates exist
       - name: Commit dependency changes
         run: |
           git config --global user.name "github-actions"
@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "Running tests..."
           npm test
-          
-      # 9️⃣ Log completion
+
+      # 9️⃣ Log workflow completion
       - name: Log workflow completion
         run: echo "Dependency update workflow completed successfully."
