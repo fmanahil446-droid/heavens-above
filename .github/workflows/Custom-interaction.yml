@@ -1,0 +1,23 @@
+name: Generate Release Notes
+
+on:
+  push:
+    tags:
+      - 'v*'   # Runs whenever a new version tag is pushed (like v1.0.0)
+
+jobs:
+  release_notes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate Release Notes
+        id: notes
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display Release Notes
+        run: echo "${{ steps.notes.outputs.release_body }}"
