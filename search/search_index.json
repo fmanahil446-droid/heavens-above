@@ -1,1 +1,1 @@
-{"config":{"lang":["en"],"separator":"[\\s\\-]+","pipeline":["stopWordFilter"]},"docs":[{"location":"","title":"Home","text":"<p>Documentation File Here !! </p>"},{"location":"NewFile/","title":"NewFile","text":"<p>Check If its working fine or not ! </p>"}]}
+{"config":{"lang":["en"],"separator":"[\\s\\-]+","pipeline":["stopWordFilter"]},"docs":[{"location":"","title":"Home","text":"<p>Documentation File Here !! </p>"},{"location":"NewFile/","title":"New File","text":"<p>Check If its working fine or not ! </p>"}]}
