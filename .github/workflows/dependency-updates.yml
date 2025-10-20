@@ -24,12 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Check for outdated dependencies (respecting semver)
       - name: Check outdated dependencies
         run: |
           echo "Checking for outdated npm dependencies (minor/patch only)..."
-          npx npm-check-updates -u --semverLevel minor
+          npx npm-check-updates -u --target minor
           npm install
+
 
       # 5️⃣ Run audit to fix vulnerabilities
       - name: Audit & Fix Vulnerabilities
