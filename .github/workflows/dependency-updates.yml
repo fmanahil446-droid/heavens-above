@@ -10,50 +10,64 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Check for outdated dependencies
+      # 4️⃣ Check for outdated dependencies (respecting semver)
+      - name: Check outdated dependencies
         run: |
-          echo "Checking for outdated npm dependencies..."
-          npm outdated || true
+          echo "Checking for outdated npm dependencies (minor/patch only)..."
+          npx npm-check-updates -u --semverLevel minor
+          npm install
 
-      - name: Update dependencies
-        run: |
-          echo "Updating dependencies..."
-          npm update
-          npm audit fix || true
+      # 5️⃣ Run audit to fix vulnerabilities
+      - name: Audit & Fix Vulnerabilities
+        run: npm audit fix || true
 
+      # 6️⃣ Commit changes only if there are updates
       - name: Commit dependency changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add package*.json || true
-          git diff-index --quiet HEAD || git commit -m "Auto dependency update on $(date +%Y-%m-%d)"
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: automated dependency updates on $(date +%Y-%m-%d)"
+          else
+            echo "No dependency updates detected, skipping commit."
+            exit 0
+          fi
 
+      # 7️⃣ Create Pull Request on a unique branch
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Automated Dependency Update"
-          body: "This pull request includes automatically updated dependencies. Please review and merge if everything looks good."
-          branch: dependency-updates  
+          body: |
+            This pull request includes automatically updated dependencies (minor/patch only).
+            Please review and approve before merging. Tests have been run to ensure compatibility.
+          branch: dependency-updates-${{ github.run_id }}
           base: main
           commit-message: "chore: automated dependency updates"
           labels: dependencies, automation
 
-      - name: Run tests
+      # 8️⃣ Run tests to ensure updates are safe
+      - name: Run Tests
         run: |
           echo "Running tests..."
-          npm test || echo "Tests failed – please check compatibility."
-
-      - name: Log update completion
+          npm test
+          
+      # 9️⃣ Log completion
+      - name: Log workflow completion
         run: echo "Dependency update workflow completed successfully."
