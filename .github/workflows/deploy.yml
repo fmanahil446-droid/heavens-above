@@ -10,48 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3️⃣ Cache node modules to speed up installs
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # 4️⃣ Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      # 5️⃣ Run tests to ensure everything is safe
       - name: Run tests
         run: npm test || echo "No tests found"
 
-      # 6️⃣ Build the project locally
-      - name: Build project
-        run: npm run build
-
-      # 7️⃣ Install Vercel CLI
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      # 8️⃣ Deploy the prebuilt project to Vercel
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel deploy --prod --token $VERCEL_TOKEN --prebuilt --confirm
-
-      # 9️⃣ Log workflow completion
-      - name: Log workflow completion
-        run: echo "Build and deploy workflow completed successfully."
+          vercel pull --yes --token $VERCEL_TOKEN
+          vercel build --token $VERCEL_TOKEN
+          vercel deploy --prod --token $VERCEL_TOKEN --confirm
