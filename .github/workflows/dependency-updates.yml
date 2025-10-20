@@ -55,10 +55,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Automated Dependency Update"
           body: "This pull request includes automatically updated dependencies. Please review and merge if everything looks good."
-          branch: ${{ steps.commit.outputs.branch }}
+          branch: ${{ steps.commit.outputs.branch }}  
           base: main
           commit-message: "chore: automated dependency updates"
           labels: dependencies, automation
+          create-branch: true       # <<< important!
+
 
       - name: Run tests
         run: |
