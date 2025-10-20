@@ -2,8 +2,8 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: "0 0 * * 1"  
-  workflow_dispatch:      
+    - cron: "0 0 * * 1"   
+  workflow_dispatch:        
 
 jobs:
   update-dependencies:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20     
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -31,21 +31,28 @@ jobs:
           echo "Updating dependencies..."
           npm update
 
-      # Add this new section here
       - name: Run npm audit fix
         run: npm audit fix || true
 
-      # Then add this section to commit and push updates
-      - name: Commit and push updates
+      - name: Commit updated dependencies
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add -f package*.json   
-          git commit -m "Auto dependency update" || echo "No changes to commit"
-          git push
+          git checkout -b dependency-updates-$(date +%Y-%m-%d)
+          git add -f package*.json
+          git commit -m "Auto dependency update on $(date +%Y-%m-%d)" || echo "No changes to commit"
 
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Automated Dependency Update"
+          body: "This pull request includes automatically updated dependencies. Please review before merging."
+          branch: dependency-updates
+          base: main
+          commit-message: "chore: automated dependency updates"
+          labels: dependencies, automation
 
-      # Optional: Run tests to ensure updates don't break anything
       - name: Run tests
         run: |
           echo "Running tests..."
