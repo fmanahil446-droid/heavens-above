@@ -2,6 +2,8 @@ const request = require("request");
 const cheerio = require("cheerio");
 const fs = require("fs");
 const utils = require("./utils");
+let options; // or const options = {}
+let current;
 
 const property = ["url", "date", "brightness", "events", "passType", "image", "scoreData", "exist", "score", "id"];
 const events = ["rise", "reachAltitude10deg", "highestPoint", "dropBelowAltitude10deg", "set", "exitShadow", "enterShadow"];
