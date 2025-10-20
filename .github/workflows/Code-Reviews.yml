@@ -1,0 +1,34 @@
+name: Code Review Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      - run: github/codeql-action/analyze@v2
+
+      - name: Scan for Secrets
+        uses: trufflesecurity/trufflehog@v3
