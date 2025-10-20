@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-      - docs
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-deploy:
@@ -18,27 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      # Step 2: Set up Python (for MkDocs)
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '20'
+          python-version: '3.x'
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install
+      # Step 3: Install MkDocs and theme
+      - name: Install MkDocs
+        run: |
+          pip install mkdocs mkdocs-material
 
-      # Step 4: Build documentation (if you have a build script)
-      # If your docs are already in 'public', you can skip this step
+      # Step 4: Build documentation from Markdown
       - name: Build documentation
-        run: npm run build-docs || echo "No build script, using public/ folder directly"
+        run: mkdocs build --clean
 
-      # Step 5: Deploy to GitHub Pages
+      # Step 5: Deploy generated site to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
-          user_name: github-actions
-          user_email: github-actions@github.com
+          publish_dir: ./site
