@@ -4,6 +4,9 @@ const fs = require("fs");
 const utils = require("./utils");
 
 const eventsIridium = ["brightness", "altitude", "azimuth", "satellite", "distanceToFlareCentre", "brightnessAtFlareCentre", "date", "time", "distanceToSatellite", "AngleOffFlareCentre-line", "flareProducingAntenna", "sunAltitude", "angularSeparationFromSun", "image", "id"];
+let options; // or const options = {}
+let current;
+
 
 function getTable(config) {
 	let database = config.database || [];
