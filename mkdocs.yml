@@ -1,0 +1,6 @@
+site_name: Heavens Above Documentation
+nav:
+  - Home: index.md
+docs_dir: docs
+theme:
+  name: material
