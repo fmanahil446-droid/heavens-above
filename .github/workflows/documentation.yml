@@ -13,10 +13,6 @@ jobs:
       # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
-        
-      - name: Install MkDocs and plugins
-        run: |
-          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
 
       # Step 2: Set up Python (for MkDocs)
       - name: Set up Python
@@ -24,12 +20,12 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Step 3: Install MkDocs and theme
-      - name: Install MkDocs
+      # Step 3: Install MkDocs and required plugins
+      - name: Install MkDocs and plugins
         run: |
-          pip install mkdocs mkdocs-material
+          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
 
-      # Step 4: Build documentation from Markdown
+      # Step 4: Build documentation from Markdown files
       - name: Build documentation
         run: mkdocs build --clean
 
