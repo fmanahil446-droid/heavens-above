@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
-      
+      - docs
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,20 +24,14 @@ jobs:
         with:
           node-version: '20'
 
-      # Step 3: Install MkDocs
-      - name: Install MkDocs
-        run: |
-          npm install -g mkdocs
-          npm install -g mkdocs-material || echo "Optional theme"
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-      # Step 4: Build documentation
-      - name: Build MkDocs docs
-        run: |
-          if [ -f "mkdocs.yml" ]; then
-            mkdocs build -d public
-          else
-            echo "No mkdocs.yml found, skipping build."
-          fi
+      # Step 4: Build documentation (if you have a build script)
+      # If your docs are already in 'public', you can skip this step
+      - name: Build documentation
+        run: npm run build-docs || echo "No build script, using public/ folder directly"
 
       # Step 5: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
