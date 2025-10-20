@@ -1,3 +1,4 @@
+/* eslint-env jest */
 const sum = require('./sum');
 
 test('adds 2 + 3 to equal 5', () => {
