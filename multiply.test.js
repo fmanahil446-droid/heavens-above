@@ -1,4 +1,5 @@
 // multiply.test.js
+/* eslint-env jest */
 
 const { multiply } = require('./multiply');
 
