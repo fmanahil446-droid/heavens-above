@@ -4,34 +4,47 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Step 1️⃣: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python (for MkDocs)
+      # Step 2️⃣: Set up Python (for MkDocs)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # Step 3: Install MkDocs and required plugins
+      # Step 3️⃣: Install MkDocs and plugins
       - name: Install MkDocs and plugins
         run: |
-          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
+          echo "Installing MkDocs and required plugins..."
+          pip install --upgrade pip
+          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-minify-plugin
 
-      # Step 4: Build documentation from Markdown files
+      # Step 4️⃣: Build documentation from Markdown files
       - name: Build documentation
-        run: mkdocs build --clean
+        run: |
+          echo "Building documentation..."
+          mkdocs build --clean
 
-      # Step 5: Deploy generated site to GitHub Pages
+      # Step 5️⃣: Deploy generated site to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
+
+      # Step 6️⃣: Log success summary
+      - name: Documentation summary
+        run: |
+          echo "### 📘 Documentation Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Documentation successfully built and deployed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
