@@ -1,33 +1,40 @@
-// src/iridium.test.js
 const fs = require("fs");
 const request = require("request");
 const cheerio = require("cheerio");
 const utils = require("./utils");
 const { getTable } = require("./iridium");
 
-// 🧩 Mock external dependencies
 jest.mock("fs");
 jest.mock("request");
 jest.mock("cheerio");
 jest.mock("./utils");
 
-// 🧰 Mock utils
 utils.get_options.mockReturnValue({ url: "https://mock.url" });
 utils.post_options.mockReturnValue({ url: "https://mock.url" });
 utils.iridium_options.mockReturnValue({ url: "https://mock.details" });
 utils.image_options.mockReturnValue({ url: "https://mock.image" });
 utils.md5.mockReturnValue("mocked-id-123");
 
-// 🧩 Mock cheerio.load behavior
 cheerio.load.mockImplementation(() => {
-  const fake = jest.fn();
-  fake.find = () => fake;
-  fake.eq = () => fake;
-  fake.text = () => "mocked-text";
-  fake.attr = () => "mocked-attr";
-  fake.each = (cb) => cb(0, {});
-  fake.html = () => "<table></table>";
-  return fake;
+  const element = {
+    find: () => element,
+    eq: () => element,
+    text: () => "mocked-text",
+    attr: () => "mocked-attr",
+    each: (cb) => cb(0, {}),
+    html: () => "<table></table>"
+  };
+
+  // return callable function $() that behaves like cheerio
+  const $ = jest.fn(() => element);
+  $.find = element.find;
+  $.eq = element.eq;
+  $.text = element.text;
+  $.attr = element.attr;
+  $.each = element.each;
+  $.html = element.html;
+
+  return $;
 });
 
 describe("Iridium getTable()", () => {
@@ -108,6 +115,7 @@ describe("Iridium getTable()", () => {
 
   test("handles request error safely", () => {
     request.mockImplementation((opt, cb) => cb(new Error("network fail")));
+
     expect(() =>
       getTable({
         root: "./data/",
