@@ -1,28 +1,36 @@
 site_name: Heavens Above Documentation
-site_url: https://fmanahil446-droid.github.io/heavens-above
-
+site_url: https://fmanahil446-droid.github.io/heavens-above/
 theme:
   name: material
   features:
-    - navigation.instant
-    - navigation.sections
     - navigation.expand
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
     - search.highlight
+    - search.suggest
 
 plugins:
   - search
   - awesome-pages
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      fallback_to_build_date: true
 
 markdown_extensions:
   - toc:
       permalink: true
+  - tables
+  - fenced_code
   - admonition
   - codehilite
-  - footnotes
-  - tables
   - attr_list
-  - def_list
 
-nav:
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/<your-username>/<your-repo-name>
+
+nav:   # 👈 Optional — keep only if you want a custom homepage label
   - Home: index.md
-  - New File: NewFile.md
