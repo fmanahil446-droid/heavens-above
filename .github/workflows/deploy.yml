@@ -21,8 +21,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test || echo "No tests found"
+      - name: Run lint 
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script found; skipping."
+          fi
+
+      - name: Run all tests
+        run: |
+          echo "Running all Jest tests..."
+          npm test
 
       - name: Install Vercel CLI
         run: npm install -g vercel
