@@ -11,44 +11,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
+      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
 
-      # 3️⃣ Install dependencies
+      # Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Run ESLint checks
+      # Run ESLint checks
       - name: Run ESLint
         run: |
           echo "Running ESLint checks..."
           npm run lint || echo "Lint issues detected but continuing..."
 
-      # 5️⃣ Run all Jest tests
+      # Run all Jest tests
       - name: Run Tests
         run: |
           echo "Running Jest tests..."
           npm test -- --passWithNoTests || echo "Some tests failed, continuing review..."
 
-      # 6️⃣ Audit npm dependencies
+      # Audit npm dependencies
       - name: Audit Dependencies
         run: |
           echo "Checking for security vulnerabilities..."
           npm audit --audit-level=moderate || echo "Vulnerabilities found but continuing..."
 
-      # 7️⃣ Summarize code review results
+      # Initialize CodeQL for security analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      # Build the project automatically for CodeQL
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      # Analyze code for vulnerabilities and quality issues
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      # Summarize code review results
       - name: Code Review Summary
         run: |
           echo "### Code Review Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch:** $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
           echo "- **Run ID:** $GITHUB_RUN_ID" >> $GITHUB_STEP_SUMMARY
+          echo "- **ESLint:** Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests:** Executed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Audit:** Checked for vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "- **CodeQL:** Security analysis complete" >> $GITHUB_STEP_SUMMARY
           echo "- **Status:** Review completed successfully" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
