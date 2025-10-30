@@ -1,10 +1,16 @@
-name: Documentation
+name: Documentation Deployment
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write   # Needed to push to gh-pages branch
 
 jobs:
   build-and-deploy:
@@ -12,7 +18,7 @@ jobs:
 
     steps:
       # Step 1️⃣: Checkout repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       # Step 2️⃣: Set up Python (for MkDocs)
@@ -21,30 +27,35 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Step 3️⃣: Install MkDocs and plugins
+      # Step 3️⃣: Install MkDocs and dependencies
       - name: Install MkDocs and plugins
         run: |
-          echo "Installing MkDocs and required plugins..."
+          echo "Installing MkDocs and dependencies..."
           pip install --upgrade pip
-          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-minify-plugin
+          pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin
 
-      # Step 4️⃣: Build documentation from Markdown files
+      # Step 4️⃣: Build the documentation site
       - name: Build documentation
         run: |
-          echo "Building documentation..."
+          echo "Building MkDocs site..."
           mkdocs build --clean
+          echo "✅ Documentation build complete."
 
-      # Step 5️⃣: Deploy generated site to GitHub Pages
+      # Step 5️⃣: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: ./site
+          commit_message: "docs: auto-update documentation on $(date +'%Y-%m-%d %H:%M:%S')"
+          force_orphan: false  # Keeps version history for docs
 
-      # Step 6️⃣: Log success summary
-      - name: Documentation summary
+      # Step 6️⃣: Summarize deployment
+      - name: Deployment summary
         run: |
-          echo "### 📘 Documentation Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ✅ Documentation successfully built and deployed" >> $GITHUB_STEP_SUMMARY
+          echo "### 📘 Documentation Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch:** $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed to:** gh-pages" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Successfully published documentation" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
