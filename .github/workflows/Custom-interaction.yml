@@ -3,21 +3,44 @@ name: Generate Release Notes
 on:
   push:
     tags:
-      - 'v*'   # Runs whenever a new version tag is pushed (like v1.0.0)
+      - "v*"   # Runs whenever a new version tag is pushed (like v1.0.0)
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   release_notes:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Step 2: Generate release notes using Release Drafter
       - name: Generate Release Notes
         id: notes
         uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Display Release Notes
-        run: echo "${{ steps.notes.outputs.release_body }}"
+      # Step 3: Save release notes to a .txt file
+      - name: Save Release Notes to File
+        run: |
+          TAG_NAME=${GITHUB_REF_NAME}
+          FILE_NAME="release-notes-${TAG_NAME}.txt"
+          echo "${{ steps.notes.outputs.release_body }}" > $FILE_NAME
+          echo "✅ Release notes saved as $FILE_NAME"
+
+      # Step 4: Upload the .txt file as a workflow artifact
+      - name: Upload Release Notes Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes-*.txt
+
+      # Step 5: Optionally publish a GitHub Release
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.notes.outputs.release_body }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
