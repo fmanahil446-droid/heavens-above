@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Step 1️⃣: Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Generate release notes using Release Drafter
+      # Step 2️⃣: Generate release notes using Release Drafter
       - name: Generate Release Notes
         id: notes
         uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 3: Save release notes to a .txt file
+      # Step 3️⃣: Save release notes to a .txt file
       - name: Save Release Notes to File
         run: |
           TAG_NAME=${GITHUB_REF_NAME}
@@ -30,17 +30,19 @@ jobs:
           echo "${{ steps.notes.outputs.release_body }}" > $FILE_NAME
           echo "✅ Release notes saved as $FILE_NAME"
 
-      # Step 4: Upload the .txt file as a workflow artifact
-      - name: Upload Release Notes Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-notes
-          path: release-notes-*.txt
-
-      # Step 5: Optionally publish a GitHub Release
+      # Step 4️⃣: Publish a GitHub Release
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           body: ${{ steps.notes.outputs.release_body }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 5️⃣: Add summary report to GitHub Actions
+      - name: Release Summary
+        run: |
+          echo "### 🚀 Release Notes Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run ID:** $GITHUB_RUN_ID" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Release successfully generated and published" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
