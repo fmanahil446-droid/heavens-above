@@ -39,3 +39,6 @@ http://www.gnu.org/licenses/gpl-3.0.html
 User Customize
 Changes is just happen to check te changes!
 HELLO !!!!
+
+## Version 1.0.1
+- Added release notes workflow automation
